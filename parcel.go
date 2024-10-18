@@ -39,6 +39,9 @@ func (s ParcelStore) Get(number int) (Parcel, error) {
 
 	row := s.db.QueryRow("SELECT number, address, client, created_at, status FROM parcel WHERE number = :n", sql.Named("n", number))
 	err := row.Scan(&p.Number, &p.Address, &p.Client, &p.CreatedAt, &p.Status)
+	if err != nil {
+		return Parcel{}, err
+	}
 
 	return p, err
 }
@@ -52,6 +55,7 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 
@@ -117,6 +121,4 @@ func (s ParcelStore) Delete(number int) error {
 
 	_, err = s.db.Exec("DELETE FROM parcel WHERE number = :number", sql.Named("number", number))
 	return err
-
-	return nil
 }
